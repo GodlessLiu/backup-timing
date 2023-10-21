@@ -1,0 +1,24 @@
+{
+  "name": "backup-timing",
+  "version": "0.0.1",
+  "description": "一个定时备份的插件",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "node ./src/index.js",
+    "test": "node ./src/index_test.js"
+  },
+  "keywords": [
+    "Halo",
+    "Plugin",
+    "Backup"
+  ],
+  "author": "Hilary Liu|2788370451@qq.com",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.5.1",
+    "dayjs": "^1.11.10",
+    "dotenv": "^16.3.1",
+    "node-cron": "^3.0.2"
+  }
+}
