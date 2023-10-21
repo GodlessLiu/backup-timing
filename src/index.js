@@ -7,7 +7,6 @@ const URL = process.env.BASE_URL + "/apis/migration.halo.run/v1alpha1/backups";
 const CHECKURL =
   process.env.BASE_URL +
   "/apis/migration.halo.run/v1alpha1/backups?sort=metadata.creationTimestamp%2Cdesc";
-const MAX_LENGTH = 5;
 
 function generatePayload(expire) {
   return {
@@ -23,14 +22,22 @@ function generatePayload(expire) {
   };
 }
 
-async function checkBackup() {
+async function checkBackup(success_on_save, failed_on_save) {
   const { data } = await axios.get(CHECKURL, {
     headers: {
       Authorization: "Bearer " + process.env.TOKEN,
     },
   });
-  const total = data.total;
-  if (total >= MAX_LENGTH) return data.items.slice(4);
+  const successList = data.items.filter(
+    (item) => item.status.phase === "SUCCEEDED"
+  );
+  const failList = data.items.filter((item) => item.status.phase === "FAILED");
+  if (
+    successList.length >= success_on_save ||
+    failList.length >= failed_on_save
+  ) {
+    return [...successList.slice(4), ...failList.slice(4)];
+  }
   return [];
 }
 async function fetchBackup(payload) {
@@ -43,8 +50,11 @@ async function fetchBackup(payload) {
 }
 
 async function main(config) {
-  const deleteArray = await checkBackup();
-  const payload = generatePayload();
+  const deleteArray = await checkBackup(
+    config.success_on_save,
+    config.failed_on_save
+  );
+  const payload = generatePayload(config.expire);
   if (deleteArray.length) {
     deleteArray.forEach(async (item) => {
       await axios.delete(URL + "/" + item.metadata.name, {
@@ -61,7 +71,7 @@ async function main(config) {
   console.log("backup success");
 }
 
-corn.schedule("30 0 * * *", () => {
+corn.schedule("*/10 * * * * *", () => {
   const config = require("../setting.json");
   main(config);
 });

@@ -2,5 +2,7 @@
   "expire": {
     "num": 7,
     "unit": "day"
-  }
+  },
+  "success_on_save": 5,
+  "failed_on_save": 5
 }
